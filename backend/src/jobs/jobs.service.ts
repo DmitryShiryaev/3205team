@@ -5,15 +5,19 @@ import {
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { CreateJobDto } from './dto/create-job.dto';
+import { JobProcessor } from './job-processor';
 import { JobStore } from './job-store';
 import { STATUS, TERMINAL_JOB_STATUSES } from './jobs.constants';
 import type { Job, JobStatus, JobSummary } from './jobs.types';
 
 @Injectable()
 export class JobsService {
-  constructor(private readonly store: JobStore) {}
+  constructor(
+    private readonly store: JobStore,
+    private readonly processor: JobProcessor,
+  ) {}
 
-  /** Создаёт задачу со всеми URL в статусе pending. */
+  /** Создаёт задачу в pending и сразу запускает обработку в фоне. */
   create(dto: CreateJobDto): { jobId: string } {
     const job: Job = {
       id: randomUUID(),
@@ -26,6 +30,7 @@ export class JobsService {
     };
 
     this.store.save(job);
+    this.processor.start(job.id);
     return { jobId: job.id };
   }
 
@@ -43,7 +48,7 @@ export class JobsService {
     return job;
   }
 
-  /** Отменяет задачу и все ещё pending URL. */
+  /** Отменяет задачу и все ещё pending URL; in_progress доводятся до конца. */
   cancel(id: string): Job {
     const job = this.findOne(id);
 

@@ -34,3 +34,23 @@ export const TERMINAL_JOB_STATUSES: readonly JobStatus[] = [
   STATUS.CANCELLED,
   STATUS.FAILED,
 ];
+
+export const JOB_URL_CONCURRENCY: number = 5;
+export const URL_CHECK_DELAY_MAX_MS: number = 10_000;
+export const URL_CHECK_TIMEOUT_MS: number = 15_000;
+
+export const URL_ERROR_INVALID: string = 'Invalid URL';
+export const URL_ERROR_TIMEOUT: string = 'Request timed out';
+export const URL_ERROR_NETWORK: string = 'Network error';
+
+export type JobProcessorOptions = {
+  concurrency: number;
+  delayMaxMs: number;
+  requestTimeoutMs: number;
+};
+
+export const DEFAULT_JOB_PROCESSOR_OPTIONS: JobProcessorOptions = {
+  concurrency: JOB_URL_CONCURRENCY,
+  delayMaxMs: URL_CHECK_DELAY_MAX_MS,
+  requestTimeoutMs: URL_CHECK_TIMEOUT_MS,
+};
