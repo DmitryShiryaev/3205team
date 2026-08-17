@@ -10,7 +10,7 @@ body {
 }
 
 main {
-  max-width: 960px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 24px 16px 48px;
 }
@@ -26,4 +26,144 @@ section {
 h1,
 h2 {
   margin-top: 0;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 12px;
+  padding: 8px;
+  font: inherit;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.error {
+  color: #b42318;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(0, 1.6fr);
+  gap: 16px;
+}
+
+.jobs-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.jobs-list li + li {
+  margin-top: 8px;
+}
+
+.jobs-list button {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  grid-template-rows: auto auto;
+  gap: 4px 8px;
+  width: 100%;
+  text-align: left;
+  padding: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.jobs-list button.active {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.job-id,
+.job-id-full {
+  font-family: ui-monospace, monospace;
+  font-size: 0.9em;
+}
+
+.job-date {
+  grid-column: 1 / -1;
+  color: #6b7280;
+  font-size: 0.85em;
+}
+
+.details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.details-header h2 {
+  margin-bottom: 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95em;
+}
+
+th,
+td {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.url-cell {
+  word-break: break-all;
+}
+
+.status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.85em;
+  background: #f3f4f6;
+}
+
+.status-pending {
+  background: #f3f4f6;
+}
+
+.status-in_progress {
+  background: #dbeafe;
+}
+
+.status-completed,
+.status-success {
+  background: #dcfce7;
+}
+
+.status-cancelled {
+  background: #e5e7eb;
+}
+
+.status-failed,
+.status-error {
+  background: #fee2e2;
+}
+
+@media (max-width: 800px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
 }
