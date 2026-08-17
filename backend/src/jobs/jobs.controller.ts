@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { CreateJobDto } from './dto/create-job.dto';
 import { JobsService } from './jobs.service';
+import type { Job, JobSummary } from './jobs.types';
 
 @Controller('jobs')
 export class JobsController {
@@ -17,22 +18,22 @@ export class JobsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() dto: CreateJobDto) {
+  create(@Body() dto: CreateJobDto): { jobId: string } {
     return this.jobsService.create(dto);
   }
 
   @Get()
-  findAll() {
+  findAll(): JobSummary[] {
     return this.jobsService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string): Job {
     return this.jobsService.findOne(id);
   }
 
   @Delete(':id')
-  cancel(@Param('id') id: string) {
+  cancel(@Param('id') id: string): Job {
     return this.jobsService.cancel(id);
   }
 }
