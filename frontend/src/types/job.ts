@@ -77,7 +77,7 @@ export function jobProgressText(job: Job): string {
     }
   }
 
-  if (cancelled > 0) {
+  if (job.status === STATUS.CANCELLED || cancelled > 0) {
     return `${String(checked)} проверено, ${String(cancelled)} отменено`;
   }
 
