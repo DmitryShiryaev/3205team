@@ -1,4 +1,4 @@
-import type { UrlItem } from '../types/job';
+import { formatDateTime, type UrlItem } from '../types/job';
 import { StatusBadge } from './StatusBadge';
 
 type UrlRowProps = {
@@ -14,6 +14,12 @@ export function UrlRow({ item }: UrlRowProps) {
       </td>
       <td>{item.httpStatus ?? '—'}</td>
       <td>{item.error ?? '—'}</td>
+      <td className="time-cell">
+        {item.startedAt ? formatDateTime(item.startedAt) : '—'}
+      </td>
+      <td className="time-cell">
+        {item.finishedAt ? formatDateTime(item.finishedAt) : '—'}
+      </td>
       <td>{item.durationMs != null ? `${item.durationMs} мс` : '—'}</td>
     </tr>
   );

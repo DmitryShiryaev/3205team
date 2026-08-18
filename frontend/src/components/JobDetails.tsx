@@ -63,7 +63,9 @@ export function JobDetails() {
             <th>Статус</th>
             <th>HTTP</th>
             <th>Ошибка</th>
-            <th>Время</th>
+            <th>Начало</th>
+            <th>Конец</th>
+            <th>Длительность</th>
           </tr>
         </thead>
         <tbody>

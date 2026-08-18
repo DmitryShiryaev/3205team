@@ -1,12 +1,9 @@
 import { useJobsStore } from '../store/jobsStore';
+import { formatDateTime } from '../types/job';
 import { StatusBadge } from './StatusBadge';
 
 function shortId(id: string): string {
   return id.slice(0, 8);
-}
-
-function formatDate(value: string): string {
-  return new Date(value).toLocaleString('ru');
 }
 
 export function JobsList() {
@@ -40,7 +37,7 @@ export function JobsList() {
                 <span>
                   {job.stats.success}/{job.stats.error}/{job.stats.total}
                 </span>
-                <span className="job-date">{formatDate(job.createdAt)}</span>
+                <span className="job-date">{formatDateTime(job.createdAt)}</span>
               </button>
             </li>
           ))}

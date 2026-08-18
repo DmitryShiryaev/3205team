@@ -38,6 +38,8 @@ export const TERMINAL_JOB_STATUSES: readonly JobStatus[] = [
 export const JOB_URL_CONCURRENCY: number = 5;
 export const URL_CHECK_DELAY_MAX_MS: number = 10_000;
 export const URL_CHECK_TIMEOUT_MS: number = 15_000;
+export const URL_CHECK_USER_AGENT: string =
+  'Mozilla/5.0 (compatible; URLChecker/1.0)';
 
 export const URL_ERROR_INVALID: string = 'Invalid URL';
 export const URL_ERROR_TIMEOUT: string = 'Request timed out';

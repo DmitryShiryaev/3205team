@@ -79,14 +79,13 @@ docker compose up --build
   "url": "https://yandex.ru",
   "status": "success",
   "httpStatus": 200,
-  "error": "Invalid URL",
   "startedAt": "ISO-8601",
   "finishedAt": "ISO-8601",
   "durationMs": 1234
 }
 ```
 
-Поля `httpStatus` / `error` / тайминги есть только если проверка уже дошла до соответствующего шага.
+Поля `httpStatus` / `error` / тайминги есть только если проверка уже дошла до соответствующего шага. Для битого URL будет `error: "Invalid URL"` без `httpStatus`.
 
 ### Статусы
 
@@ -103,9 +102,3 @@ URL: `pending` → `in_progress` → `success` \| `error` \| `cancelled`.
 - `DELETE` переводит job и оставшиеся `pending` URL в `cancelled`; уже `in_progress` доводятся до конца
 
 После каждой проверки URL — случайная пауза 0–10 с.
-
-## HEAD → GET (отклонение от ТЗ, сейчас выключено)
-
-В задании указан только HTTP **HEAD**. Многие серверы HEAD не поддерживают и отвечают `405` или `501`.
-
-Код GET-fallback оставлен закомментированным в `url-checker.ts`. Сейчас проверка идёт только HEAD: 405/501 — это `error` + `httpStatus`.

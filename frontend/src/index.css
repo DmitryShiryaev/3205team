@@ -132,6 +132,12 @@ td {
   word-break: break-all;
 }
 
+.time-cell {
+  white-space: nowrap;
+  color: #6b7280;
+  font-size: 0.85em;
+}
+
 .status {
   display: inline-block;
   padding: 2px 8px;

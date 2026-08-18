@@ -77,3 +77,7 @@ export function parseUrlLines(text: string): string[] {
     .map((line) => line.trim())
     .filter((line) => line !== '');
 }
+
+export function formatDateTime(value: string): string {
+  return new Date(value).toLocaleString('ru');
+}

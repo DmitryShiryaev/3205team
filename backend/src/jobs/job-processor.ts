@@ -1,4 +1,4 @@
-import { Inject, Injectable, OnModuleDestroy } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { JobStore } from './job-store';
 import { STATUS, URL_ERROR_INVALID } from './jobs.constants';
 import type { JobProcessorOptions } from './jobs.constants';
@@ -12,6 +12,7 @@ export type { JobProcessorOptions };
 
 @Injectable()
 export class JobProcessor implements OnModuleDestroy {
+  private readonly logger = new Logger(JobProcessor.name);
   private stopped = false;
   private readonly abort = new AbortController();
   private readonly sleepResolvers = new Set<() => void>();
@@ -55,7 +56,11 @@ export class JobProcessor implements OnModuleDestroy {
     try {
       await this.processItems(job);
       this.completeIfNotCancelled(jobId);
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        `Job ${jobId} failed`,
+        error instanceof Error ? error.stack : String(error),
+      );
       this.failIfNotCancelled(jobId);
     }
   }

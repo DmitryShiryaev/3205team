@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from '@jest/globals';
-import { URL_ERROR_TIMEOUT } from './jobs.constants';
+import { URL_CHECK_USER_AGENT, URL_ERROR_TIMEOUT } from './jobs.constants';
 import { isHttpUrl, UrlChecker } from './url-checker';
 
 describe('UrlChecker', () => {
@@ -19,6 +19,9 @@ describe('UrlChecker', () => {
   it('treats 4xx as error with httpStatus', async () => {
     global.fetch = (_url, init) => {
       expect(init?.method).toBe('HEAD');
+      expect(new Headers(init?.headers).get('User-Agent')).toBe(
+        URL_CHECK_USER_AGENT,
+      );
       return Promise.resolve(new Response(null, { status: 404 }));
     };
 
@@ -84,22 +87,6 @@ describe('UrlChecker', () => {
       error: 'HTTP 405',
     });
   });
-
-  // GET-fallback при 405 (отключён):
-  // it('retries with GET when HEAD returns 405', async () => {
-  //   const methods: string[] = [];
-  //   global.fetch = (_url, init) => {
-  //     const method = init?.method ?? 'GET';
-  //     methods.push(method);
-  //     return Promise.resolve(
-  //       new Response(null, { status: method === 'HEAD' ? 405 : 200 }),
-  //     );
-  //   };
-  //
-  //   const result = await new UrlChecker().check('https://yandex.ru');
-  //   expect(methods).toEqual(['HEAD', 'GET']);
-  //   expect(result).toEqual({ ok: true, httpStatus: 200 });
-  // });
 
   it('maps abort timeout to Request timed out', async () => {
     global.fetch = (_url, init) => {

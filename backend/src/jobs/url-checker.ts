@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   URL_CHECK_TIMEOUT_MS,
+  URL_CHECK_USER_AGENT,
   URL_ERROR_NETWORK,
   URL_ERROR_TIMEOUT,
 } from './jobs.constants';
@@ -8,13 +9,6 @@ import {
 export type UrlCheckResult =
   | { ok: true; httpStatus: number }
   | { ok: false; error: string; httpStatus?: number };
-
-// GET-fallback при 405/501 отключён — раскомментировать вместе с блоком в check().
-// const HEAD_FALLBACK_STATUSES = new Set([405, 501]);
-//
-// function responseStatus(result: UrlCheckResult): number | undefined {
-//   return result.httpStatus;
-// }
 
 function classifyHttpStatus(status: number): UrlCheckResult {
   if (status >= 200 && status < 400) {
@@ -39,25 +33,16 @@ export function isHttpUrl(value: string): boolean {
 
 @Injectable()
 export class UrlChecker {
-  /** HEAD-запрос. GET при 405/501 отключён. */
+  /** HTTP HEAD, таймаут по умолчанию 15 с. */
   async check(
     url: string,
     options?: { timeoutMs?: number; signal?: AbortSignal },
   ): Promise<UrlCheckResult> {
     const timeoutMs = options?.timeoutMs ?? URL_CHECK_TIMEOUT_MS;
-    const head = await this.request('HEAD', url, timeoutMs, options?.signal);
-
-    // Fallback: при 405/501 повторить GET (тело отбрасывается).
-    // const headStatus = responseStatus(head);
-    // if (headStatus !== undefined && HEAD_FALLBACK_STATUSES.has(headStatus)) {
-    //   return this.request('GET', url, timeoutMs, options?.signal);
-    // }
-
-    return head;
+    return this.request(url, timeoutMs, options?.signal);
   }
 
   private async request(
-    method: 'HEAD' | 'GET',
     url: string,
     timeoutMs: number,
     external?: AbortSignal,
@@ -74,9 +59,10 @@ export class UrlChecker {
 
     try {
       const response = await fetch(url, {
-        method,
+        method: 'HEAD',
         redirect: 'follow',
         signal,
+        headers: { 'User-Agent': URL_CHECK_USER_AGENT },
       });
       await discardBody(response);
       return classifyHttpStatus(response.status);

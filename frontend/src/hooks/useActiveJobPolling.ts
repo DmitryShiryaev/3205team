@@ -38,9 +38,7 @@ export function useActiveJobPolling(): void {
       }, POLL_INTERVAL_MS);
     };
 
-    timer = setTimeout(() => {
-      void tick();
-    }, POLL_INTERVAL_MS);
+    void tick();
 
     return () => {
       controller.abort();
