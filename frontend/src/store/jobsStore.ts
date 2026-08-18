@@ -77,8 +77,10 @@ export const useJobsStore = create<JobsState>((set, get) => ({
   },
 
   selectJob: async (id: string) => {
+    const previousId = get().activeJobId;
     set({
       activeJobId: id,
+      activeJob: previousId === id ? get().activeJob : null,
       detailsLoading: true,
       detailsError: null,
     });
@@ -88,7 +90,11 @@ export const useJobsStore = create<JobsState>((set, get) => ({
       if (get().activeJobId !== id) {
         return;
       }
-      set({ activeJob: job, detailsLoading: false });
+      set({
+        activeJob: job,
+        detailsLoading: false,
+        jobs: replaceJob(get().jobs, job),
+      });
     } catch (error) {
       if (get().activeJobId !== id) {
         return;
@@ -131,16 +137,16 @@ export const useJobsStore = create<JobsState>((set, get) => ({
       set({
         activeJob: job,
         jobs: replaceJob(get().jobs, job),
-        cancelling: false,
       });
     } catch (error) {
       if (get().activeJobId !== id) {
         return;
       }
       set({
-        cancelling: false,
         detailsError: toErrorMessage(error),
       });
+    } finally {
+      set({ cancelling: false });
     }
   },
 
@@ -151,14 +157,15 @@ export const useJobsStore = create<JobsState>((set, get) => ({
     }
 
     try {
-      const [jobs, job] = await Promise.all([
-        fetchJobs(signal),
-        fetchJob(id, signal),
-      ]);
+      const job = await fetchJob(id, signal);
       if (signal.aborted || get().activeJobId !== id) {
         return;
       }
-      set({ jobs, activeJob: job, detailsError: null });
+      set({
+        jobs: replaceJob(get().jobs, job),
+        activeJob: job,
+        detailsError: null,
+      });
     } catch (error) {
       if (signal.aborted || get().activeJobId !== id) {
         return;

@@ -48,7 +48,7 @@ export function CreateJobForm() {
           <p className="error">{formError ?? jobsError}</p>
         )}
         <button type="submit" disabled={creating}>
-          {creating ? 'Создание…' : 'Создать задание'}
+          {creating ? 'Запуск…' : 'Запустить проверку'}
         </button>
       </form>
     </section>

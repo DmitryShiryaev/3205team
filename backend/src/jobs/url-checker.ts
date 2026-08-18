@@ -6,9 +6,27 @@ import {
 } from './jobs.constants';
 
 export type UrlCheckResult =
-  { ok: true; httpStatus: number } | { ok: false; error: string };
+  | { ok: true; httpStatus: number }
+  | { ok: false; error: string; httpStatus?: number };
 
-const HEAD_FALLBACK_STATUSES = new Set([405, 501]);
+// GET-fallback при 405/501 отключён — раскомментировать вместе с блоком в check().
+// const HEAD_FALLBACK_STATUSES = new Set([405, 501]);
+//
+// function responseStatus(result: UrlCheckResult): number | undefined {
+//   return result.httpStatus;
+// }
+
+function classifyHttpStatus(status: number): UrlCheckResult {
+  if (status >= 200 && status < 400) {
+    return { ok: true, httpStatus: status };
+  }
+
+  return {
+    ok: false,
+    httpStatus: status,
+    error: `HTTP ${String(status)}`,
+  };
+}
 
 export function isHttpUrl(value: string): boolean {
   try {
@@ -21,7 +39,7 @@ export function isHttpUrl(value: string): boolean {
 
 @Injectable()
 export class UrlChecker {
-  /** HEAD-запрос; при 405/501 повторяет GET. */
+  /** HEAD-запрос. GET при 405/501 отключён. */
   async check(
     url: string,
     options?: { timeoutMs?: number; signal?: AbortSignal },
@@ -29,9 +47,11 @@ export class UrlChecker {
     const timeoutMs = options?.timeoutMs ?? URL_CHECK_TIMEOUT_MS;
     const head = await this.request('HEAD', url, timeoutMs, options?.signal);
 
-    if (head.ok && HEAD_FALLBACK_STATUSES.has(head.httpStatus)) {
-      return this.request('GET', url, timeoutMs, options?.signal);
-    }
+    // Fallback: при 405/501 повторить GET (тело отбрасывается).
+    // const headStatus = responseStatus(head);
+    // if (headStatus !== undefined && HEAD_FALLBACK_STATUSES.has(headStatus)) {
+    //   return this.request('GET', url, timeoutMs, options?.signal);
+    // }
 
     return head;
   }
@@ -59,7 +79,7 @@ export class UrlChecker {
         signal,
       });
       await discardBody(response);
-      return { ok: true, httpStatus: response.status };
+      return classifyHttpStatus(response.status);
     } catch (error) {
       if (external?.aborted) {
         throw error instanceof Error ? error : new Error('Aborted');

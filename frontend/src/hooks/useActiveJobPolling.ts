@@ -6,11 +6,16 @@ const POLL_INTERVAL_MS = 1800;
 
 export function useActiveJobPolling(): void {
   const activeJobId = useJobsStore((state) => state.activeJobId);
-  const status = useJobsStore((state) => state.activeJob?.status);
+  const shouldPoll = useJobsStore((state) => {
+    const status = state.activeJob?.status;
+    return Boolean(
+      state.activeJobId && status && !isTerminalJobStatus(status),
+    );
+  });
   const pollActiveJob = useJobsStore((state) => state.pollActiveJob);
 
   useEffect(() => {
-    if (!activeJobId || !status || isTerminalJobStatus(status)) {
+    if (!activeJobId || !shouldPoll) {
       return;
     }
 
@@ -19,11 +24,18 @@ export function useActiveJobPolling(): void {
 
     const tick = async (): Promise<void> => {
       await pollActiveJob(controller.signal);
-      if (!controller.signal.aborted) {
-        timer = setTimeout(() => {
-          void tick();
-        }, POLL_INTERVAL_MS);
+      if (controller.signal.aborted) {
+        return;
       }
+
+      const status = useJobsStore.getState().activeJob?.status;
+      if (!status || isTerminalJobStatus(status)) {
+        return;
+      }
+
+      timer = setTimeout(() => {
+        void tick();
+      }, POLL_INTERVAL_MS);
     };
 
     timer = setTimeout(() => {
@@ -36,5 +48,5 @@ export function useActiveJobPolling(): void {
         clearTimeout(timer);
       }
     };
-  }, [activeJobId, status, pollActiveJob]);
+  }, [activeJobId, shouldPoll, pollActiveJob]);
 }

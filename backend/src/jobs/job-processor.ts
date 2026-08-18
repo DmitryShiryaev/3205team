@@ -99,7 +99,6 @@ export class JobProcessor implements OnModuleDestroy {
     const startedAtMs = Date.now();
 
     if (!isHttpUrl(item.url)) {
-      await this.sleep(this.randomDelayMs());
       this.finishItem(item, startedAtMs, {
         status: STATUS.ERROR,
         error: URL_ERROR_INVALID,
@@ -133,6 +132,7 @@ export class JobProcessor implements OnModuleDestroy {
     this.finishItem(item, startedAtMs, {
       status: STATUS.ERROR,
       error: result.error,
+      httpStatus: result.httpStatus,
     });
   }
 
@@ -141,7 +141,7 @@ export class JobProcessor implements OnModuleDestroy {
     startedAtMs: number,
     result:
       | { status: typeof STATUS.SUCCESS; httpStatus: number }
-      | { status: typeof STATUS.ERROR; error: string },
+      | { status: typeof STATUS.ERROR; error: string; httpStatus?: number },
   ): void {
     if (this.stopped) {
       return;
@@ -157,10 +157,17 @@ export class JobProcessor implements OnModuleDestroy {
     }
 
     item.error = result.error;
+    if (result.httpStatus !== undefined) {
+      item.httpStatus = result.httpStatus;
+    }
   }
 
   /** Ставит completed, если job не успели отменить. */
   private completeIfNotCancelled(jobId: string): void {
+    if (this.stopped) {
+      return;
+    }
+
     const job = this.store.get(jobId);
     if (job && job.status !== STATUS.CANCELLED) {
       job.status = STATUS.COMPLETED;
