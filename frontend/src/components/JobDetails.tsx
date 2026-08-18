@@ -1,5 +1,5 @@
 import { useJobsStore } from '../store/jobsStore';
-import { isTerminalJobStatus, processedCount } from '../types/job';
+import { isTerminalJobStatus, jobProgressText } from '../types/job';
 import { StatusBadge } from './StatusBadge';
 import { UrlRow } from './UrlRow';
 
@@ -53,7 +53,7 @@ export function JobDetails() {
       {detailsError && <p className="error">{detailsError}</p>}
       <p>
         <StatusBadge status={job.status} />{' '}
-        {processedCount(job)} из {job.items.length} обработано
+        {jobProgressText(job)}
       </p>
       <p className="job-id-full">{job.id}</p>
       <table>

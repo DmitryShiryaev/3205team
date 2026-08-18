@@ -64,11 +64,37 @@ export function isTerminalJobStatus(status: JobStatus): boolean {
   return (TERMINAL_JOB_STATUSES as readonly JobStatus[]).includes(status);
 }
 
-export function processedCount(job: Job): number {
-  return job.items.filter(
-    (item) =>
-      item.status !== STATUS.PENDING && item.status !== STATUS.IN_PROGRESS,
-  ).length;
+/** Прогресс в деталях: отменённые URL не считаются «обработанными». */
+export function jobProgressText(job: Job): string {
+  let checked = 0;
+  let cancelled = 0;
+
+  for (const item of job.items) {
+    if (item.status === STATUS.SUCCESS || item.status === STATUS.ERROR) {
+      checked += 1;
+    } else if (item.status === STATUS.CANCELLED) {
+      cancelled += 1;
+    }
+  }
+
+  if (cancelled > 0) {
+    return `${String(checked)} проверено, ${String(cancelled)} отменено`;
+  }
+
+  return `${String(checked)} из ${String(job.items.length)} обработано`;
+}
+
+/** После отмены job уже terminal, но in_progress URL ещё дорабатывают. */
+export function shouldPollJob(job: Job | null): boolean {
+  if (!job) {
+    return false;
+  }
+
+  if (!isTerminalJobStatus(job.status)) {
+    return true;
+  }
+
+  return job.items.some((item) => item.status === STATUS.IN_PROGRESS);
 }
 
 export function parseUrlLines(text: string): string[] {

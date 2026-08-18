@@ -1,17 +1,14 @@
 import { useEffect } from 'react';
 import { useJobsStore } from '../store/jobsStore';
-import { isTerminalJobStatus } from '../types/job';
+import { shouldPollJob } from '../types/job';
 
 const POLL_INTERVAL_MS = 1800;
 
 export function useActiveJobPolling(): void {
   const activeJobId = useJobsStore((state) => state.activeJobId);
-  const shouldPoll = useJobsStore((state) => {
-    const status = state.activeJob?.status;
-    return Boolean(
-      state.activeJobId && status && !isTerminalJobStatus(status),
-    );
-  });
+  const shouldPoll = useJobsStore((state) =>
+    Boolean(state.activeJobId && shouldPollJob(state.activeJob)),
+  );
   const pollActiveJob = useJobsStore((state) => state.pollActiveJob);
 
   useEffect(() => {
@@ -28,8 +25,7 @@ export function useActiveJobPolling(): void {
         return;
       }
 
-      const status = useJobsStore.getState().activeJob?.status;
-      if (!status || isTerminalJobStatus(status)) {
+      if (!shouldPollJob(useJobsStore.getState().activeJob)) {
         return;
       }
 
